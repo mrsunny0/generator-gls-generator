@@ -1,0 +1,22 @@
+{
+  "name": "generator-test",
+  "author": "George L Sun",
+  "version": "1.0.0",
+  "description": "test",
+  "files": [
+    "generators"
+  ],
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "yeoman-generator"
+  ],
+  "license": "MIT",
+  "dependencies": {
+    "yeoman-test": "^2.3.0"
+  },
+  "devDependencies": {
+    "mocha": "^7.1.1"
+  }
+}
