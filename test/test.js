@@ -6,49 +6,49 @@ const { exec } = require("child_process")
 const { spawn } = require("child_process")
 
 // remove content
-fs.removeSync("test-template/*")
+// fs.removeSync("test-template/*")
 
-describe("Test package installations", () => {
-    // see if package.json templates properly
-    it('inspect package.json', () => {
-        return helpers
-            .run(path.join(__dirname, "../generators/app"))
-            .inDir(path.join(__dirname, "test-dir"))
-            // .inTmpDir(path.join(__dirname, "test-template"))
-            .withOptions({})
-            .withArguments([])
-            .withPrompts({
-                name: 'test',
-                author: 'test-name',
-                description: 'test-description',
-                packages: 'path js test',
-                devpackages: true,
-                type: 'internal'
-            }).then(() => {
-                exec("cat package.json", (error, stdout, stderr) => {
-                    console.log(stdout)
-                })
-            })
-    })
+// describe("Test package installations", () => {
+//     // see if package.json templates properly
+//     it('inspect package.json', () => {
+//         return helpers
+//             .run(path.join(__dirname, "../generators/app"))
+//             .inDir(path.join(__dirname, "test-dir"))
+//             // .inTmpDir(path.join(__dirname, "test-template"))
+//             .withOptions({})
+//             .withArguments([])
+//             .withPrompts({
+//                 name: 'test',
+//                 author: 'test-name',
+//                 description: 'test-description',
+//                 packages: 'path js test',
+//                 devpackages: true,
+//                 type: 'internal'
+//             }).then(() => {
+//                 exec("cat package.json", (error, stdout, stderr) => {
+//                     console.log(stdout)
+//                 })
+//             })
+//     })
 
-    // test empty package
-    it('inspect package.json', () => {
-        return helpers
-            .run(path.join(__dirname, "../generators/app"))
-            .inDir(path.join(__dirname, "test-dir"))
-            .withOptions({})
-            .withArguments([])
-            .withPrompts({
-                name: 'test',
-                author: 'test-name',
-                description: 'test-description',
-                type: 'internal'
-            }).then(() => {
-                exec("cat package.json", (error, stdout, stderr) => {
-                    console.log(stdout)
-                })
-            })
-    })
+//     // test empty package
+//     it('inspect package.json', () => {
+//         return helpers
+//             .run(path.join(__dirname, "../generators/app"))
+//             .inDir(path.join(__dirname, "test-dir"))
+//             .withOptions({})
+//             .withArguments([])
+//             .withPrompts({
+//                 name: 'test',
+//                 author: 'test-name',
+//                 description: 'test-description',
+//                 type: 'internal'
+//             }).then(() => {
+//                 exec("cat package.json", (error, stdout, stderr) => {
+//                     console.log(stdout)
+//                 })
+//             })
+//     })
 
     // // install npm packages
     // it('install npm packages', () => {
@@ -67,7 +67,7 @@ describe("Test package installations", () => {
     //         }).then(() => {
     //         }).on('end', done()) // <- need to tell promise to finish
     // })
-})
+// })
 
 describe("Test external templating", () => {
     // check external
