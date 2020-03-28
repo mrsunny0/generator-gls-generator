@@ -1,5 +1,7 @@
 const Generator = require('yeoman-generator');
 
+// THIS IS INTERNAL
+
 module.exports = class extends Generator {
 	/*
 	 * Constructor
