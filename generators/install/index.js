@@ -5,7 +5,17 @@ module.exports = class extends Generator {
 	 * Constructor
 	 */
 	constructor(args, opts) {
-        super(args, opts);
+		super(args, opts);
+
+		// options provided by the app generator
+		this.option("install", {
+			type: Boolean,
+			default: false
+		})
+		this.option("repo", {
+			type: String,
+			default: ""
+		})
 	}	
 
 	/* 

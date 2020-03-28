@@ -6,12 +6,12 @@
   "files": [
     "generators"
   ],
-  "scripts": {
-    <%- scripts %>
-  },
   "keywords": [
     "yeoman-generator"
   ],
+  "scripts": {
+    <%- scripts %>
+  },
   "dependencies": {
     <%- packages %>
   },

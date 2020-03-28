@@ -91,6 +91,7 @@ module.exports = class extends Generator {
 		// install root files and folders
 		if (this.answers.packages) {
 			var input_packages = this.answers.packages.split(" ")
+			input_packages.unshift("yeoman-generator")
 			var packages = input_packages.reduce((c, p) => {
 				return c + '"' + p + '": \"*\",\n\t\t' 
 			}, "")

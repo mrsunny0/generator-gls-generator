@@ -13,7 +13,7 @@ describe("Test package installations", () => {
     it('inspect package.json', () => {
         return helpers
             .run(path.join(__dirname, "../generators/app"))
-            .inDir(path.join(__dirname, "test-template"))
+            .inDir(path.join(__dirname, "test-dir"))
             // .inTmpDir(path.join(__dirname, "test-template"))
             .withOptions({})
             .withArguments([])
@@ -35,7 +35,7 @@ describe("Test package installations", () => {
     it('inspect package.json', () => {
         return helpers
             .run(path.join(__dirname, "../generators/app"))
-            .inDir(path.join(__dirname, "test-template"))
+            .inDir(path.join(__dirname, "test-dir"))
             .withOptions({})
             .withArguments([])
             .withPrompts({
@@ -74,7 +74,7 @@ describe("Test external templating", () => {
     it('get external git repo', () => {
         return helpers
             .run(path.join(__dirname, "../generators/app"))
-            .inDir(path.join(__dirname, "test-template"))
+            .inDir(path.join(__dirname, "test-dir"))
             .withOptions({install: false})
             .withArguments([])
             .withPrompts({
@@ -82,6 +82,7 @@ describe("Test external templating", () => {
                 author: 'test-name',
                 description: 'test-description',
                 type: 'external',
+                packages: "path",
                 repo: "https://github.com/octocat/Hello-World"
             }).then(() => {
             })
