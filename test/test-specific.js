@@ -7,7 +7,7 @@ const answerPrompts = config.answerPrompts
 const deleteDir = config.deleteDir
 
 describe("Specific test", () => {
-    it('what am I testing', () => {
+    it('Manually input, specific test', () => {
         var answers = {
             packages: "path express",
             type: "custom",
@@ -15,7 +15,7 @@ describe("Specific test", () => {
             devpackages: true,
         }
         var options = {
-            install: false
+            install: true
         }
         answerPrompts(answers, options, [], "test-specific")
     })

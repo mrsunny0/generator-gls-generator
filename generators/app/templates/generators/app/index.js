@@ -2,8 +2,6 @@ const Generator = require('yeoman-generator');
 const path = require('path');
 const fs = require('fs-extra');
 
-console.log(template_finder)
-
 module.exports = class extends Generator {
 	/*
 	 * Constructor

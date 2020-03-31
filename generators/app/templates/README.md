@@ -1,3 +1,3 @@
 # Generator-<%= name %>
-&nbsp;&nbsp;&nbsp;&nbsp;**created by**: <%= author %>
-&nbsp;&nbsp;&nbsp;&nbsp;<%= description %>
+&nbsp;&nbsp;&nbsp;&nbsp;**Created by**: <%= author %> <br>
+&nbsp;&nbsp;&nbsp;&nbsp;**Description**: <%= description %>

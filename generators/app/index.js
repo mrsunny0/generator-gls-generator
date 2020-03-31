@@ -138,7 +138,8 @@ module.exports = class extends Generator {
 					\t\t"yeoman-test": "*",
 					\t\t"yeoman-assert": "*"`.trim()
 				var scripts = stripIndent`
-					"test": "mocha -u bdd -R spec -t 500 --recursive",
+					"test": "mocha -u bdd -R spec -t 500",
+					\t\t"test-all": "mocha -u bdd -R spec -t 500 --recursive",
 					\t\t"watch": "mocha -u bdd -R spec -t 500 --recursive --watch"
 				`.trim()
 			} else {
