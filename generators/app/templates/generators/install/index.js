@@ -5,7 +5,7 @@ module.exports = class extends Generator {
 	 * Constructor
 	 */
 	constructor(args, opts) {
-        super(args, opts);
+		super(args, opts);
 	}	
 
 	/* 
@@ -21,7 +21,8 @@ module.exports = class extends Generator {
 		}
 	}
 
-	end() {
-		// this.log("...tidying up")
-	}
+	/* 
+	 * End
+	 */
+	end() {}
 };

@@ -1,90 +1,76 @@
 const helpers = require('yeoman-test');
 const assert = require('chai')
-const path = require('path')
-const fs = require('fs-extra')
 const { exec } = require("child_process")
 const { spawn } = require("child_process")
+const config = require("./config.js")
+const answerPrompts = config.answerPrompts
+const deleteDir = config.deleteDir
 
-// remove content
-// fs.removeSync("test-template/*")
+describe("Test package installations", () => {
+    // basic testing of standard templating
+    context("standard templating", () => {
+        it('inspect package.json', () => {
+            var answers = {
+                packages: "a b c d e",
+                devpackages: true,
+                type: "standard"
+            }
+            answerPrompts(answers, {}, [], "test-package-json")
+        })
+        it('test for duplicate packages in package.json', () => {
+            var answers = {
+                packages: "a b c d e",
+                devpackages: true,
+                type: "standard"
+            }
+            answerPrompts(answers, {}, [], "test-package-duplicates")
+        })
+        it('inspect standard templating', () => {
+            var answers = {
+                packages: "path fs-extra NEW",
+                devpackages: true,
+                type: "standard"
+            }
+            answerPrompts(answers, {}, [], "test-standard")
+                .then(() => {
+                    exec("cat package.json", (error, stdout, stderr) => {
+                        console.log(stdout)
+                    })
+                })
+        })
+    })
 
-// describe("Test package installations", () => {
-//     // see if package.json templates properly
-//     it('inspect package.json', () => {
-//         return helpers
-//             .run(path.join(__dirname, "../generators/app"))
-//             .inDir(path.join(__dirname, "test-dir"))
-//             // .inTmpDir(path.join(__dirname, "test-template"))
-//             .withOptions({})
-//             .withArguments([])
-//             .withPrompts({
-//                 name: 'test',
-//                 author: 'test-name',
-//                 description: 'test-description',
-//                 packages: 'path js test',
-//                 devpackages: true,
-//                 type: 'internal'
-//             }).then(() => {
-//                 exec("cat package.json", (error, stdout, stderr) => {
-//                     console.log(stdout)
-//                 })
-//             })
-//     })
-
-//     // test empty package
-//     it('inspect package.json', () => {
-//         return helpers
-//             .run(path.join(__dirname, "../generators/app"))
-//             .inDir(path.join(__dirname, "test-dir"))
-//             .withOptions({})
-//             .withArguments([])
-//             .withPrompts({
-//                 name: 'test',
-//                 author: 'test-name',
-//                 description: 'test-description',
-//                 type: 'internal'
-//             }).then(() => {
-//                 exec("cat package.json", (error, stdout, stderr) => {
-//                     console.log(stdout)
-//                 })
-//             })
-//     })
-
-    // // install npm packages
-    // it('install npm packages', () => {
-    //     return helpers
-    //         .run(path.join(__dirname, "../generators/app"))
-    //         .inDir(path.join(__dirname, "test-template"))
-    //         .withOptions({install: true})
-    //         .withArguments([])
-    //         .withPrompts({
-    //             name: 'test',
-    //             author: 'test-name',
-    //             description: 'test-description',
-    //             packages: 'path js test',
-    //             devpackages: true,
-    //             type: 'internal'
-    //         }).then(() => {
-    //         }).on('end', done()) // <- need to tell promise to finish
-    // })
-// })
-
-describe("Test external templating", () => {
-    // check external
-    it('get external git repo', () => {
-        return helpers
-            .run(path.join(__dirname, "../generators/app"))
-            .inDir(path.join(__dirname, "test-dir"))
-            .withOptions({install: false})
-            .withArguments([])
-            .withPrompts({
-                name: 'test',
-                author: 'test-name',
-                description: 'test-description',
-                type: 'external',
-                packages: "path",
+    // custom templating
+    context("custom templating", () => {
+        it('inspect custom/empty templating', () => {
+            var answers = {
+                type: "custom",
+                // repo: ""
+            }
+            answerPrompts(answers, {}, [], "test-custom1")
+        })
+        it('inspect custom/repo templating', () => {
+            var answers = {
+                type: "custom",
                 repo: "https://github.com/octocat/Hello-World"
-            }).then(() => {
-            })
+            }
+            answerPrompts(answers, {}, [], "test-custom2")
+        })
+    })
+
+    // installing packages
+    context("install", () => {
+        it('full install (using standard)', () => {
+            var answers = {
+                packages: "path fs-extra",
+                devpackages: true,
+                type: "custom",
+                repo: "https://github.com/octocat/Hello-World"
+            }
+            var options = {
+                install: false
+            }
+            answerPrompts(answers, options, [], "custom-install")
+        })
     })
 })
