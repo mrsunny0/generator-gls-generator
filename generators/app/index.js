@@ -1,4 +1,7 @@
 const Generator = require('yeoman-generator');
+const { stripIndent } = require("common-tags")
+const path = require('path')
+const fs = require('fs-extra')
 
 module.exports = class extends Generator {
 	/*
@@ -14,13 +17,6 @@ module.exports = class extends Generator {
 			default: false
 		})
 
-		// flag for generator link
-		this.option("link", {
-			desc: "Link generator",
-			type: Boolean,
-			default: false
-		})
-
 		this.log("templating files...")
 	}	
 
@@ -30,31 +26,50 @@ module.exports = class extends Generator {
 	async prompting() {
 		const answers = await this.prompt([
 		{
+			// Author name
+			type: "input",
+			name: "author",
+			message: "author",
+			default: "George L Sun" // default
+		},
+		{
+			// Project (generator) name
 			type: "input",
 			name: "name",
 			message: "project name",
 			default: this.appname // Default to current folder name
 		},
 		{
+			// Project description
 			type: "input",
 			name: "description",
 			message: "description",
-			default: "description of " + this.appname
+			default: "description of " + this.appname // default
 		},
 		{
+			// Packages to include
 			type: "input",
 			name: "packages",
 			message: "list required packages (separated by spaces)",
-			default: null
+			default: ""
 		},
 		{
+			// Include dev and test packages?
+			type: "boolean",
+			name: "devpackages",
+			message: "include test packages (mocha, chai, gulp, etc.)", 	
+			default: false
+		},
+		{
+			// Type of file hierarchy templating
 			type: "list",
 			name: "type",
-			message: "template location [internal (standard), external, both]",
-			choices: ["internal", "external", "both"],
+			message: "template location [internal (standard), external]",
+			choices: ["internal", "external"],
 			default: "internal"
 		},
 		{
+			// If external, which git repo to use?
 			when: (answers) => {
 				return ("external" === answers.type)
 			},
@@ -63,15 +78,6 @@ module.exports = class extends Generator {
 			message: "which external repo would you like to reference?",
 			default: null
 		},
-		{
-			when: (answers) => {
-				return (answers.repo)
-			},
-			type: "boolean",
-			name: "clone",
-			message: "would you like to clone this repo?",
-			default: false
-		}
 		]);
 	
 		// save answers
@@ -82,49 +88,78 @@ module.exports = class extends Generator {
 	 * Write
 	 */
 	writing() {
-		// switch between internal, external, or both templating
-		switch (this.answers.type) {
-			case "internal":
-				// ignore external sub-generator and the external template folder
-				var ignore = ["**/external", "/templates"]
-				break
-			case "external":
-				// ignore internal sub-generator
-				var ignore = ["**/internal"]
-				// copy external template folder
-				this.fs.copyTpl(
-					this.templatePath("templates/**/*"),
-					this.destinationPath("templates"),
-					{},
-					{},
-					{
-						globOptions: {
-							dot: true
-						}
-					}
-				)
-				break
-			case "both":
-				// ignore none
-				var ignore = []
-				break
+		// install root files and folders
+		if (this.answers.packages) {
+			var input_packages = this.answers.packages.split(" ")
+			input_packages.unshift("yeoman-generator")
+			var packages = input_packages.reduce((c, p) => {
+				return c + '"' + p + '": \"*\",\n\t\t' 
+			}, "")
+			packages = packages.slice(0, -4)
+		} else {
+			var packages = ""
 		}
 
-		// install relevant paths, and using ignores from switch case
+		if (this.answers.devpackages) {
+			var devpackages = stripIndent`
+				"gulp": "*",
+				\t\t"mocha": "*",
+				\t\t"chai": "*",
+				\t\t"yeoman-test": "*",
+				\t\t"yeoman-assert": "*"`.trim()
+			var scripts = stripIndent`
+				"test": "mocha -u bdd -R spec -t 500 --recursive",
+				\t\t"watch": "mocha -u bdd -R spec -t 500 --recursive --watch"
+			`.trim()
+		} else {
+			var devpackages = ""
+			var scripts = ""
+		}
+		
+		// Tempalte files except the generators
 		this.fs.copyTpl(
-			this.templatePath("**/*"),
+			this.templatePath("*"),
 			this.destinationPath(),
 			{
+				author: this.answers.author,
 				name: this.answers.name,
 				description: this.answers.description,
+				scripts: scripts,
+				packages: packages,
+				devpackages: devpackages
 			},
 			{},
 			{
 				globOptions: {
-					ignore: ignore,
+					ignore: ["generators"],
 					dot: true
 				}
 			}
+		)
+
+		// switch statement for internal, external, or both templating
+		switch (this.answers.type) {
+			case "internal": 
+				var template_path = "generators/internal/*"
+				this.fs.copyTpl(
+					this.templatePath(template_path),
+					this.destinationPath("generators/app")
+				)
+				break
+
+			case "external":
+				var template_path = "generators/external/*"
+				this.fs.copyTpl(
+					this.templatePath(template_path),
+					this.destinationPath("generators/app")
+				)
+				fs.mkdirpSync("templates") // create a template git dir
+		}
+
+		// copy install sub-generator
+		this.fs.copyTpl(
+			this.templatePath("generators/install/*"),
+			this.destinationPath("generators/install")
 		)
 	}
 
@@ -132,45 +167,13 @@ module.exports = class extends Generator {
 	 * Install
 	 */
 	install() {
-		// clone external repo
-		if (this.answers.clone) {
-			this.spawnCommandSync(
-				"git",
-				['init']
-			)
-			this.spawnCommandSync(
-				"git", 
-				["submodule", "add", this.answers.repo],
-				{
-					cwd: "templates/"
-				}
-			)
-		}
-
-		// install packages
-		var packages = this.answers.packages
-		if (packages) {
-			var package_list = packages.split(" ")
-			package_list.forEach((p) => {
-				this.log("installing package: " + p)
-				if (this.options.install) {
-					var flag = '-s'
-				} else {
-					var flag = ""
-				}
-				this.spawnCommandSync("npm", ["install", flag, p])
-			})
-			this.spawnCommandSync("npm", ["install", flag, "yeoman-generator"])
-		} else {
-			this.log("manually install using npm install")
-		}
-
-		// link generator
-		if (this.options.link) {
-			this.spawnCommandSync("npm", ["link"])
-		} else {
-			this.log("manually sync generator using npm link")
-		}
+		this.composeWith(
+			require.resolve(path.join(__dirname, "..", "install")), 
+			{
+				install: this.options.install,
+				repo: this.answers.repo
+			}
+		)
 	}
 
 	end() {

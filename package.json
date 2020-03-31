@@ -6,17 +6,25 @@
   "files": [
     "generators"
   ],
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "keywords": [
     "yeoman-generator"
   ],
-  "license": "MIT",
+  "scripts": {
+    "test": "mocha -u bdd -R spec -t 500 --recursive",
+    "watch": "mocha -u bdd -R spec -t 500 --recursive --watch"
+  },
   "dependencies": {
-    "yeoman-test": "^2.3.0"
+    "common-tags": "^1.8.0",
+    "rimraf": "^3.0.2",
+    "yeoman-generator": "^4.7.2"
   },
   "devDependencies": {
-    "mocha": "^7.1.1"
-  }
+    "chai": "^4.2.0",
+    "fs-extra": "^9.0.0",
+    "mkdirp": "^1.0.3",
+    "mocha": "^7.1.1",
+    "yeoman-assert": "^3.1.1",
+    "yeoman-test": "^2.3.0"
+  },
+  "license": "MIT"
 }
