@@ -10,7 +10,8 @@
     "yeoman-generator"
   ],
   "scripts": {
-    "test": "mocha -u bdd -R spec -t 500 --recursive",
+    "test": "mocha -u bdd -R spec -t 500",
+    "test-all": "mocha -u bdd -R spec -t --recursive 500",
     "watch": "mocha -u bdd -R spec -t 500 --recursive --watch"
   },
   "dependencies": {

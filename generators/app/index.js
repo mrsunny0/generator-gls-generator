@@ -10,14 +10,19 @@ module.exports = class extends Generator {
 	constructor(args, opts) {
 		super(args, opts);
 
+		// default answers
+		this.option("default", {
+			desc: "Default option",
+			type: Boolean,
+			default: false
+		})
+
 		// flag for install
 		this.option("install", {
 			desc: "Prevent full installation",
 			type: Boolean,
 			default: false
 		})
-
-		this.log("templating files...")
 	}	
 
 	/*
@@ -37,7 +42,7 @@ module.exports = class extends Generator {
 			type: "input",
 			name: "name",
 			message: "project name",
-			default: this.appname // Default to current folder name
+			default: this.appname.replace("[\s.]", "-") // Default to current folder name
 		},
 		{
 			// Project description
@@ -64,19 +69,19 @@ module.exports = class extends Generator {
 			// Type of file hierarchy templating
 			type: "list",
 			name: "type",
-			message: "template location [internal (standard), external]",
-			choices: ["internal", "external"],
-			default: "internal"
+			message: "template style",
+			choices: ["standard", "custom"],
+			default: "standard"
 		},
 		{
 			// If external, which git repo to use?
 			when: (answers) => {
-				return ("external" === answers.type)
+				return ("custom" === answers.type)
 			},
 			type: "input",
 			name: "repo",
-			message: "which external repo would you like to reference?",
-			default: null
+			message: "would you like to place a git repo in this template?, if so, add git URL",
+			default: ""
 		},
 		]);
 	
@@ -88,94 +93,184 @@ module.exports = class extends Generator {
 	 * Write
 	 */
 	writing() {
-		// install root files and folders
-		if (this.answers.packages) {
-			var input_packages = this.answers.packages.split(" ")
-			input_packages.unshift("yeoman-generator")
-			var packages = input_packages.reduce((c, p) => {
-				return c + '"' + p + '": \"*\",\n\t\t' 
-			}, "")
-			packages = packages.slice(0, -4)
-		} else {
-			var packages = ""
-		}
+		//-------------------------------
+		// Templating basic files such as 
+		// README, package.json, etc.
+		//-------------------------------
+		var basic_files = () => {
+			var default_packages = [
+				"yeoman-generator",
+				"path",
+				"fs-extra",
+				"common-tags"
+			]
 
-		if (this.answers.devpackages) {
-			var devpackages = stripIndent`
-				"gulp": "*",
-				\t\t"mocha": "*",
-				\t\t"chai": "*",
-				\t\t"yeoman-test": "*",
-				\t\t"yeoman-assert": "*"`.trim()
-			var scripts = stripIndent`
-				"test": "mocha -u bdd -R spec -t 500 --recursive",
-				\t\t"watch": "mocha -u bdd -R spec -t 500 --recursive --watch"
-			`.trim()
-		} else {
-			var devpackages = ""
-			var scripts = ""
+			// Parse packages inputted by the user
+			if (this.answers.packages) {
+				var input_packages = this.answers.packages.split(" ")
+			} else {
+				var input_packages = []
+			}
+
+			// Combine default packages and user defined while 
+			// removing any duplicates, then convert into string
+			var joined_packages = default_packages.concat(
+				input_packages.filter((p) => {
+					return default_packages.indexOf(p) < 0
+				})
+			)
+
+			var packages = joined_packages.reduce((c, p, i) => {
+				if (i < joined_packages.length-1) {
+					var delimiter = ',\n\t\t'
+				} else {
+					var delimiter = ""
+				}
+				return c + '"' + p + '": \"*\"' + delimiter
+			}, "")
+
+			// If devpackages option was chosen, populate
+			if (this.answers.devpackages) {
+				var devpackages = stripIndent`
+					"gulp": "*",
+					\t\t"mocha": "*",
+					\t\t"chai": "*",
+					\t\t"yeoman-test": "*",
+					\t\t"yeoman-assert": "*"`.trim()
+				var scripts = stripIndent`
+					"test": "mocha -u bdd -R spec -t 500",
+					\t\t"test-all": "mocha -u bdd -R spec -t 500 --recursive",
+					\t\t"watch": "mocha -u bdd -R spec -t 500 --recursive --watch"
+				`.trim()
+			} else {
+				var devpackages = ""
+				var scripts = ""
+			}
+
+			// Template files except the generators
+			this.fs.copyTpl(
+				this.templatePath("*"),
+				this.destinationPath(),
+				{
+					author: this.answers.author,
+					name: this.answers.name,
+					description: this.answers.description,
+					scripts: scripts,
+					packages: packages,
+					devpackages: devpackages
+				},
+				{},
+				{
+					globOptions: {
+						ignore: ["generators", "test"],
+						dot: true
+					}
+				}
+			)
 		}
 		
-		// Tempalte files except the generators
-		this.fs.copyTpl(
-			this.templatePath("*"),
-			this.destinationPath(),
-			{
-				author: this.answers.author,
-				name: this.answers.name,
-				description: this.answers.description,
-				scripts: scripts,
-				packages: packages,
-				devpackages: devpackages
-			},
-			{},
-			{
-				globOptions: {
-					ignore: ["generators"],
-					dot: true
-				}
+		//----------------------------------
+		// Create template locations
+		// for standard, custom, custom/repo
+		//----------------------------------
+		var template_files = () => {
+			// initialize location of src files and dst files
+			var source_path = "generators/app/index.js"
+			var destination_path = source_path
+			var template_path = ""
+			var template_content = ""
+
+			// switch statement for app/index.js standard or custom templating
+			switch (this.answers.type) {
+				case "standard":				
+					template_path = "generators/app/templates"
+					template_content = ""
+					break
+				case "custom":
+					template_path = "generators/templates" 
+					template_content = stripIndent`
+					// create root template folder path 
+					\t\tvar sourceRoot = this.sourceRoot() 
+					\t\tsourceRoot = path.join(sourceRoot, "../../templates")
+					\t\tthis.sourceRoot(sourceRoot) 
+					`
+					break
 			}
-		)
 
-		// switch statement for internal, external, or both templating
-		switch (this.answers.type) {
-			case "internal": 
-				var template_path = "generators/internal/*"
-				this.fs.copyTpl(
-					this.templatePath(template_path),
-					this.destinationPath("generators/app")
-				)
-				break
+			// copy file and template paths
+			this.fs.copyTpl(
+				this.templatePath(source_path),
+				this.destinationPath(destination_path),
+				{
+					content: template_content
+				}
+			)
 
-			case "external":
-				var template_path = "generators/external/*"
-				this.fs.copyTpl(
-					this.templatePath(template_path),
-					this.destinationPath("generators/app")
+			// create template path, and populate with
+			// .placeholder or git repo
+			fs.mkdirpSync(template_path) 
+			if (this.answers.repo) {
+				this.spawnCommandSync(
+					"git",
+					['init']
 				)
-				fs.mkdirpSync("templates") // create a template git dir
+				this.spawnCommandSync(
+					"git", 
+					["submodule", "add", this.answers.repo],
+					{
+						cwd: template_path
+					}
+				)
+			}
+			// or create empty placeholder
+			else {
+				this.fs.write(
+					path.join(this.destinationPath(), template_path, ".placeholder"),
+					"# placeholder"
+				)
+			}
+
 		}
 
-		// copy install sub-generator
-		this.fs.copyTpl(
-			this.templatePath("generators/install/*"),
-			this.destinationPath("generators/install")
+		//------------------------------------
+		// Directly copy install sub-generator
+		//------------------------------------
+		var install_files = () => {
+			// copy install sub-generator
+			this.fs.copyTpl(
+				this.templatePath("generators/install/*"),
+				this.destinationPath("generators/install")
+			)
+		}
+
+		//------------------------------------
+		// Template tests 
+		//------------------------------------
+		this.fs.copy(
+			this.templatePath("test/*"),
+			this.destinationPath("test")
 		)
+
+		// Call functions
+		basic_files()
+		template_files()
+		install_files()
 	}
 
 	/* 
 	 * Install
 	 */
 	install() {
-		this.composeWith(
-			require.resolve(path.join(__dirname, "..", "install")), 
-			{
-				install: this.options.install,
-				repo: this.answers.repo
-			}
-		)
+		if (this.options.install === true) {
+			this.composeWith(
+				require.resolve('../install')
+			) 
+		}
 	}
 
+	/* 
+	 * End
+	 */
 	end() {
 		this.log("...tidying up")
 	}

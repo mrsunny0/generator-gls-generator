@@ -1,22 +1,22 @@
 {
-  "name": "generator-<%= name %>",
-  "author": "<%= name %>",
-  "version": "0.1.0",
-  "description": "<%= description %>",
-  "files": [
-    "generators"
-  ],
-  "keywords": [
-    "yeoman-generator"
-  ],
-  "scripts": {
-    <%- scripts %>
-  },
-  "dependencies": {
-    <%- packages %>
-  },
-  "devDependencies": {
-    <%- devpackages %>
-  },
-  "license": "MIT"
+	"name": "generator-<%= name %>",
+	"author": "<%= author %>",
+	"version": "0.1.0",
+	"description": "<%= description %>",
+	"files": [
+		"generators"
+	],
+	"keywords": [
+		"yeoman-generator"
+	],
+	"scripts": {
+		<%- scripts %>
+	},
+	"dependencies": {
+		<%- packages %>
+	},
+	"devDependencies": {
+		<%- devpackages %>
+	},
+	"license": "MIT"
 }
