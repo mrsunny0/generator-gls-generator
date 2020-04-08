@@ -28,7 +28,10 @@ module.exports = class extends Generator {
     * Paths
     */
     paths() {
-        <%- content %>
+        // create root template folder path 
+		var sourceRoot = this.sourceRoot() 
+		sourceRoot = path.join(sourceRoot, "../../_templates")
+		this.sourceRoot(sourceRoot)
     }
 
 	/*
@@ -85,55 +88,75 @@ module.exports = class extends Generator {
 		]);
 	
 		// save answers
-		this.answers = answers;
+		this.answers = answers; fe
 	}
 
 	/* 
 	 * Compose multiple generators
 	 */
 	writing() {
-        // copy
-        this.fs.copy(
-            this.templatePath(),
-            this.destinationPath(),
-            {},
-            {},
-            {
-                globOptions: {
-                    dot: true
-                }
-            }
-        )
+		//----------------------------------
+		// Copy some boilerplate code
+		//----------------------------------
+		var copy_files = () => {
+			this.fs.copy(
+				this.templatePath(),
+				this.destinationPath(),
+				{},
+				{},
+				{
+					globOptions: {
+						dot: true
+					}
+				}
+			)
+		}
+		//----------------------------------
+		// Template some files
+		//----------------------------------
+		var template_files = () => {
+			this.fs.copyTpl(
+				this.templatePath(),
+				this.destinationPath(),
+				{
+					key: value
+				},
+				{},
+				{
+					globOptions: {
+						ignore: ["a", "b"],
+						dot: true
+					}
+				}
+			)
+		}
+		//----------------------------------
+		// Write some custom code
+		//----------------------------------
+		var write_files = () => {
+			this.fs.write(
+				path.join(__dirname, "file_name"),
+				"contents"
+			)
+		}
 
-        // copy from template
-        this.fs.copyTpl(
-            this.templatePath(),
-            this.destinationPath(),
-            {
-                key: value
-            },
-            {},
-            {
-                globOptions: {
-                    ignore: ["a", "b"],
-                    dot: true
-                }
-            }
-        )
+		//----------------------------------
+		// Use sub-generator to compose with
+		//----------------------------------
+		var use_subgenerator = () => {
+			this.composeWith(
+				require.resolve(path.join(__dirname, "..", "sub")),
+				{
+					option_value: "option_value"
+				}
+			)
+		}
 
-        // write
-        this.fs.write(
-            path.join(__dirname, "file_name"),
-            "contents"
-        )
-
-        // compose
-		this.composeWith(
-			require.resolve(path.join(__dirname, "..", "sub")),
-			{
-				option_value: "option_value"
-			}
-		)
+		// call functions (in order)
+		copy_files()
+		template_files()
+		write_files()
+		use_subgenerator()
 	}
 
     /* 
