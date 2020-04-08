@@ -187,11 +187,11 @@ module.exports = class extends Generator {
 					template_content = ""
 					break
 				case "custom":
-					template_path = "generators/templates" 
+					template_path = "generators/_templates" 
 					template_content = stripIndent`
 					// create root template folder path 
 					\t\tvar sourceRoot = this.sourceRoot() 
-					\t\tsourceRoot = path.join(sourceRoot, "../../templates")
+					\t\tsourceRoot = path.join(sourceRoot, "../../_templates")
 					\t\tthis.sourceRoot(sourceRoot) 
 					`
 					break

@@ -15,7 +15,7 @@ describe("Specific test", () => {
             devpackages: true,
         }
         var options = {
-            install: true
+            install: false
         }
         answerPrompts(answers, options, [], "test-specific")
     })
