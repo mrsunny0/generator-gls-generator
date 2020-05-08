@@ -60,7 +60,7 @@ module.exports = class extends Generator {
 		},
 		{
 			// Include dev and test packages?
-			type: "boolean",
+			type: "confirm",
 			name: "devpackages",
 			message: "include test packages (mocha, chai, gulp, etc.)", 	
 			default: false

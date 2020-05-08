@@ -1,6 +1,7 @@
 const Generator = require('yeoman-generator');
 const path = require('path');
 const fs = require('fs-extra');
+const { stripIndent } = require("common-tags")
 
 module.exports = class extends Generator {
 	/*
@@ -83,12 +84,21 @@ module.exports = class extends Generator {
 			message: "checkbox",
 			choices: ["apple", "orange", "banana"],
 			default: "apple"
+		},
+		{
+			when: function(response) {
+				return response.checkbox == "apple"	
+			},
+			type: "input",
+			name: "afterQuestion",
+			message: "this came after a prior question",
+			default: "NA"
         },
         // rawlist, expand, password, editor (more here: https://github.com/SBoudrias/Inquirer.js/)
 		]);
 	
 		// save answers
-		this.answers = answers; fe
+		this.answers = answers;
 	}
 
 	/* 
