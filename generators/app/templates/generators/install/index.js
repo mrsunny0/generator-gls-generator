@@ -12,13 +12,10 @@ module.exports = class extends Generator {
 	 * Install
 	 */
 	install() {
-		// npm install if install flag is present
-		if (this.options.install) {
-			this.spawnCommandSync(
-				"npm",
-				["install"]
-			)
-		}
+		this.spawnCommandSync(
+			"npm",
+			["install"]
+		)
 	}
 
 	/* 
