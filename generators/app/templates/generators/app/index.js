@@ -104,6 +104,9 @@ module.exports = class extends Generator {
 	/* 
 	 * Compose multiple generators
 	 */
+	
+	// globOptions ignore may not work, for more details
+	// checkout: https://github.com/mrmlnc/fast-glob#options-3
 	writing() {
 		//----------------------------------
 		// Copy some boilerplate code
